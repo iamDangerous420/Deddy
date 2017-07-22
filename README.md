@@ -1,3 +1,3 @@
-![intro](http://www.stickpng.com/assets/images/58889546bc2fc2ef3a1860b8.png)
+![intro](http://imgur.com/a/xmIrT)
 # Deddy
 New bot we are creating.
