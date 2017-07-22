@@ -1,3 +1,3 @@
-![intro](http://imgur.com/a/xmIrT)
+![intro](http://i.imgur.com/SgOQmrr.png)
 # Deddy
 New bot we are creating.
