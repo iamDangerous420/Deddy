@@ -11,7 +11,7 @@ if not os.path.exists(h):
         f.write(json.dumps(parse, indent=4, sort_keys=True))
         f.truncate()
 else:
-    print("Found Json.")
+    print("Starting with current info.json")
 
 with open("info.json") as f:
     config = json.load(f)
@@ -37,6 +37,8 @@ def menu():
         print("2. Set The Bots Global Prefix")
         print("3. Set Bot Owner ID")
         print("4. Install Requirements")
+        #print("5. Run Bot")
+
         choice = user_choice()
         if choice == "1":
             with open(h, "r+"   ) as f:
@@ -71,6 +73,8 @@ def menu():
         elif choice == "4":
             pip.main(['install', '-r', "requirments.txt"])
             wait()
+        #elif choice == "5":
+            #python bot.py
         elif choice == "0":
             break
         if win:
