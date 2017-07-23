@@ -41,7 +41,7 @@ def menu():
         if choice == "1":
             with open(h, "r+"   ) as f:
                 configg = json.load(f)
-                token = input("Please paste your application token here.")
+                token = input("Please paste your application token here: ")
                 configg["TOKEN"] = token
                 f.seek(0)
                 f.write(json.dumps(configg, indent=4, sort_keys=True))
@@ -61,8 +61,8 @@ def menu():
         elif choice == "3":
             with open(h, "r+") as f:
                 configg = json.load(f)
-                id = input("Paste The Owner ID.")
-                configg["OWNER_ID"] = id
+                id = input("Paste The Owner ID: ")
+                configg["OWNER"] = id
                 f.seek(0)
                 f.write(json.dumps(configg, indent=4, sort_keys=True))
                 f.truncate()
