@@ -5,7 +5,7 @@ from dataIO import dataIO, fileIO
 import logging
 import time, os
 
-log = logging.getLogger("name of logs here")
+log = logging.getLogger("Logger")
 
 class _main:
     def __init__(self, bot):
@@ -16,7 +16,7 @@ class _main:
         self.cooldown = 60
 
 
-    @commands.command(name="tokens", pass_context=True)
+    @bot.command(name="tokens", pass_context=True)
     async def _tokens(self, ctx, user: discord.Member=None):
         if not user:
             user = ctx.message.author
@@ -99,8 +99,6 @@ def setup(bot):
     m = _main
     bot.add_listener(m._gaintoken, "on_message")
     bot.add_cog(m)
-
-
 
 
 

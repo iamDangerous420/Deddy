@@ -19,6 +19,8 @@ else:
 with open("info.json") as f:
     config = json.load(f)
 
+initial_extensions = [
+    'modules.repl']
 
 description = '''A Bot Made by Teddy And Dangerous through Discord.py.'''
 bot = commands.Bot(command_prefix=config["PREFIX"], description=description, pm_help=True)
@@ -28,6 +30,7 @@ async def on_ready():
     users = len(set(bot.get_all_members()))
     servers = len(bot.servers)
     channels = len([c for c in bot.get_all_channels()])
+
     print('+-------------Deddy-------------+')
     print('Logged in as\n{}({})'.format(bot.user.name,bot.user.id))
     print('+------Current Statistics------+')
@@ -36,10 +39,15 @@ async def on_ready():
     print("{} channels".format(channels))
     print("{} users".format(users))
     print('-----------------------------')
+    for extension in initial_extensions:
+        try:
+            bot.load_extension(extension)
+        except Exception as e:
+            print('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
 
 def init_logging(bot):
     logging.root.setLevel(logging.INFO)
-    logger = logging.getLogger('Logs')
+    logger = logging.getLogger('Logger')
     logger.setLevel(logging.INFO)
     log = logging.getLogger()
     log.setLevel(logging.INFO)
@@ -50,12 +58,16 @@ def init_logging(bot):
 
 @bot.event
 async def on_message(message):
+    if message.author.bot:
+        return
     if message.content.startswith(config["PREFIX"]):
-    	await bot.process_commands(message)
+        await bot.process_commands(message)
 @bot.event
 async def on_message_edit(before, message):
+    if message.author.bot:
+        return
     if message.content.startswith(config["PREFIX"]):
-    	await bot.process_commands(message)
+        await bot.process_commands(message)
 @bot.event
 async def on_command_error(error, ctx):
     channel = ctx.message.channel
@@ -87,7 +99,14 @@ async def on_command_error(error, ctx):
     else:
         logger.exception(type(error).__name__, exc_info=error)
 
-if config is not None:
-	bot.run(config["TOKEN"])
-else:
-	print('No Token set.\nRun python setup.py and configure the bot.')
+if __name__ == '__main__':
+    for extension in initial_extensions:
+        try:
+            bot.load_extension(extension)
+        except Exception as e:
+            print('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
+
+    if config is not None:
+        bot.run(config["TOKEN"])
+    else:
+        print('No Token set.\nRun python setup.py and configure the bot.')
