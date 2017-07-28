@@ -9,6 +9,17 @@ import json
 import asyncio
 import pip
 
+def init_logging(bot):
+    logging.root.setLevel(logging.INFO)
+    logger = logging.getLogger('Logger')
+    logger.setLevel(logging.INFO)
+    log = logging.getLogger()
+    log.setLevel(logging.INFO)
+    handler = logging.FileHandler(filename='Logger.log', encoding='utf-8', mode ='a')
+    log.addHandler(handler)
+    bot.logger = logger
+    bot.log = log
+
 
 h = "info.json"
 if not os.path.exists(h):
@@ -118,7 +129,11 @@ initial_extensions = [
     ]
 
 description = '''A Bot Made by Teddy And Dangerous through Discord.py.'''
-bot = commands.Bot(command_prefix=commands.when_mentioned_or(config["PREFIX"]), description=description, pm_help=True)
+class deddy(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        command_prefix= kwargs.pop('command_prefix', commands.when_mentioned_or(config["PREFIX"]))
+        init_logging(self)
+        super().__init__(command_prefix=command_prefix, *args, **kwargs)
 
 @bot.event
 async def on_ready():
@@ -189,10 +204,8 @@ async def on_message_edit(before, message):
 @bot.event
 async def on_command_error(error, ctx):
     channel = ctx.message.channel
-    if isinstance(error, commands.MissingRequiredArgument):
-        await send_cmd_help(ctx)
-    elif isinstance(error, commands.BadArgument):
-        await send_cmd_help(ctx)
+    if isinstance(error, commands.NoPrivateMessage):
+        await bot.send_message(channel, 'This command cannot be used in private messages.')
     elif isinstance(error, commands.DisabledCommand):
         await bot.send_message(channel, "✋ **That command is disabled.** ⛔")
     elif isinstance(error, commands.CommandInvokeError):
