@@ -132,8 +132,6 @@ description = '''A Bot Made by Teddy And Dangerous through Discord.py.'''
 
 class deddy(commands.Bot):
     def __init__(self, *args, **kwargs):
-        self.loop = kwargs.pop('loop', asyncio.get_event_loop())
-        asyncio.get_child_watcher().attach_loop(self.loop)
         command_prefix = kwargs.pop('command_prefix', commands.when_mentioned_or(config["PREFIX"]))
         init_logging(self)
         super().__init__(command_prefix=command_prefix, *args, **kwargs)
@@ -180,58 +178,42 @@ class deddy(commands.Bot):
             except Exception as e:
                 print('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
 
-    async def on_message(self, message):
-        if message.author.bot:
-            return
-        if message.content.startswith(config["PREFIX"]):
-            await self.process_commands(message)
-
-        await self.process_commands(message)
-
     async def on_message_edit(self, before, message):
         if message.author.bot:
             return
         if message.content.startswith(config["PREFIX"]):
             await self.process_commands(message)
 
+
     async def on_command_error(self, error, ctx):
         channel = ctx.message.channel
-        if isinstance(error, commands.MissingRequiredArgument):
-            await send_cmd_help(ctx)
-        elif isinstance(error, commands.BadArgument):
-            await send_cmd_help(ctx)
+        if isinstance(error, commands.NoPrivateMessage):
+            await bot.send_message(channel, 'This command cannot be used in private messages.')
         elif isinstance(error, commands.DisabledCommand):
-            await self.send_message(channel, "✋ **That command is disabled.** ⛔")
+            await bot.send_message(channel, "✋ **That command is disabled.** ⛔")
         elif isinstance(error, commands.CommandInvokeError):
             logger.exception("Exception in command '{}'".format(
                 ctx.command.qualified_name), exc_info=error.original)
             oneliner = "Error in command '{}' - {}: {}".format(
                 ctx.command.qualified_name, type(error.original).__name__,
                 str(error.original))
-            await ctx.self.send_message(channel, inline(oneliner))
+            await ctx.bot.send_message(channel, inline(oneliner))
         elif isinstance(error, commands.CommandNotFound):
             pass
         elif isinstance(error, commands.CheckFailure):
             pass
         elif isinstance(error, commands.NoPrivateMessage):
-            await self.send_message(channel, "✋ That command is not "
+            await bot.send_message(channel, "✋ That command is not "
                                             "available in DMs.")
         elif isinstance(error, commands.CommandOnCooldown):
-            await self.send_message(channel, "✋ **A command cooldown is initiated on this command."
+            await bot.send_message(channel, "✋ **A command cooldown is initiated on this command."
                                             " Try again in** ***`{:.2f}`s***"
                                             "".format(error.retry_after))
-
         else:
             pass
 
-bot = deddy(description=description, pm_help=True)
+bot = deddy(pm_help=True, description=description)
 if __name__ == '__main__':
-    #loop = asyncio.get_event_loop()
-    for extension in initial_extensions:
-        try:
-            bot.load_extension(extension)
-        except Exception as e:
-            print('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
 
     if config is not None:
         if config["FIRST_SETUP"] == "True":
