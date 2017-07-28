@@ -6,17 +6,18 @@ import logging
 #import emoji
 from collections import Counter
 import json
+import asyncio
 import pip
 
 
 h = "info.json"
 if not os.path.exists(h):
     with open(h, "w") as f:
-        writeJ = '{"PREFIX": "None", "TOKEN": "None", "GAME": "None", "DEV_MODE": "None", "OWNER": "None"}'
+        writeJ = '{"PREFIX": "None", "TOKEN": "None", "GAME": "None", "DEV_MODE": "False", "FIRST_SETUP": "True", "OWNER": "None"}'
         parse = json.loads(writeJ)
         f.write(json.dumps(parse, indent=4, sort_keys=True))
         f.truncate()
-        print("Created info.json\nPlease run setup.py to continue.")
+        print("Created info.json\nRunning setup.py due to first launch.")
 else:
     print("Starting with current info.json")
 
@@ -45,7 +46,7 @@ def menu():
         print("4. Install Requirements")
         print("5. Login game.")
         print("6. Developer mode.")
-        #print("5. Run Bot")
+        print("0. Run Bot")
 
         choice = user_choice()
         if choice == "1":
@@ -79,7 +80,7 @@ def menu():
                 print("Owner Id set!")
                 wait()
         elif choice == "4":
-            pip.main(['install', '-r', "requirments.txt"])
+            pip.main(['install', '-r', "req.txt"])
             wait()
         elif choice == "5":
             with open(h, "r+") as f:
@@ -174,12 +175,17 @@ async def on_message(message):
         return
     if message.content.startswith(config["PREFIX"]):
         await bot.process_commands(message)
+
+    await bot.process_commands(message)
+
 @bot.event
 async def on_message_edit(before, message):
     if message.author.bot:
         return
     if message.content.startswith(config["PREFIX"]):
         await bot.process_commands(message)
+
+
 @bot.event
 async def on_command_error(error, ctx):
     channel = ctx.message.channel
@@ -213,7 +219,6 @@ async def on_command_error(error, ctx):
 
 if __name__ == '__main__':
     #loop = asyncio.get_event_loop()
-    #menu()
     for extension in initial_extensions:
         try:
             bot.load_extension(extension)
@@ -221,11 +226,38 @@ if __name__ == '__main__':
             print('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
 
     if config is not None:
+        if config["FIRST_SETUP"] == "True":
+            with open(h, "r+") as f:
+                configg = json.load(f)
+                configg["FIRST_SETUP"] = "False"
+                f.seek(0)
+                f.write(json.dumps(configg, indent=4, sort_keys=True))
+                f.truncate()
+            print("First Setup initiated.")
+            menu()
+
+        if config["PREFIX"] == "None":
+            print('No Prefix set.\nMemu time!.')
+            with open(h, "r+") as f:
+                configg = json.load(f)
+                prefix = input("Type your prefered prefix for your bot: ")
+                configg["PREFIX"] = prefix
+                f.seek(0)
+                f.write(json.dumps(configg, indent=4, sort_keys=True))
+                f.truncate()
+                print("Global Prefix Set! Pls Wait 1s")
+                asyncio.sleep(1)
+                input("Press enter to start your bot.")
+        else:
+            pass
+    if config["TOKEN"] == "None":
+        print('No Token set.\nMemu time!.')
+        menu()
+        asyncio.sleep(1)
+    else:
         try:
             bot.run(config["TOKEN"])
         except discord.LoginFailure:
-            print("\nLogin Failure experienced possibly due to no or invalid token.\n")
+            print("\nLogin Failure experienced possibly due to an invalid token.\nPlease Reconfigure your bot.")
             menu()
-    else:
-        print('No Token set.\nRun python setup.py and configure the bot.')
-        menu()
+
