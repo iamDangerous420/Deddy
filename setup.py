@@ -6,7 +6,7 @@ import pip
 h = "info.json"
 if not os.path.exists(h):
     with open(h, "w") as f:
-        writeJ = '{"PREFIX": "None", "TOKEN": "None", "OWNER": "None"}'
+        writeJ = '{"PREFIX": "None", "TOKEN": "None", "GAME": "None", "DEV_MODE": "None", "OWNER": "None"}'
         parse = json.loads(writeJ)
         f.write(json.dumps(parse, indent=4, sort_keys=True))
         f.truncate()
@@ -37,7 +37,9 @@ def menu():
         print("2. Set The Bots Global Prefix")
         print("3. Set Bot Owner ID")
         print("4. Install Requirements")
-        #print("5. Run Bot")
+        print("5. Login game.")
+        print("6. Developer mode.")
+        print("7. Run Bot")
 
         choice = user_choice()
         if choice == "1":
@@ -73,8 +75,29 @@ def menu():
         elif choice == "4":
             pip.main(['install', '-r', "requirments.txt"])
             wait()
-        #elif choice == "5":
+        elif choice == "5":
+            with open(h, "r+") as f:
+                configg = json.load(f)
+                g = input("Paste The playing stats ypu would like to view as so as i login: ")
+                configg["GAME"] = g
+                f.seek(0)
+                f.write(json.dumps(configg, indent=4, sort_keys=True))
+                f.truncate()
+                print("Playing status set!")
+                wait()
+        elif choice == "6":
+            with open(h, "r+") as f:
+                configg = json.load(f)
+                d = input("Type True to enable or False to disable dév mode.: ")
+                configg["DEV_MODE"] = d
+                f.seek(0)
+                f.write(json.dumps(configg, indent=4, sort_keys=True))
+                f.truncate()
+                print("Developer status set!")
+                wait()
+        elif choice == "7":
             #python bot.py
+            print("WP")
         elif choice == "0":
             break
         if win:
