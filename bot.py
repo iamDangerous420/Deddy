@@ -173,17 +173,6 @@ async def on_ready():
         except Exception as e:
             print('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
 
-def init_logging(bot):
-    logging.root.setLevel(logging.INFO)
-    logger = logging.getLogger('Logger')
-    logger.setLevel(logging.INFO)
-    log = logging.getLogger()
-    log.setLevel(logging.INFO)
-    handler = logging.FileHandler(filename='Logger.log', encoding='utf-8', mode ='async')
-    log.addHandler(handler)
-    bot.logger = logger
-    bot.log = log
-
 @bot.event
 async def on_message(message):
     if message.author.bot:
