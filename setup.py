@@ -73,7 +73,7 @@ def menu():
                 print("Owner Id set!")
                 wait()
         elif choice == "4":
-            pip.main(['install', '-r', "requirments.txt"])
+            pip.main(['install', '-r', "req.txt"])
             wait()
         elif choice == "5":
             with open(h, "r+") as f:
