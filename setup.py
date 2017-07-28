@@ -6,7 +6,7 @@ import pip
 h = "info.json"
 if not os.path.exists(h):
     with open(h, "w") as f:
-        writeJ = '{"PREFIX": "None", "TOKEN": "None", "GAME": "None", "DEV_MODE": "None", "OWNER": "None"}'
+        writeJ = '{"PREFIX": "None", "TOKEN": "None", "GAME": "None", "DEV_MODE": "False", "FIRST_SETUP": "True", "OWNER": "None"}'
         parse = json.loads(writeJ)
         f.write(json.dumps(parse, indent=4, sort_keys=True))
         f.truncate()
