@@ -230,7 +230,6 @@ async def on_command_error(error, ctx):
     else:
         logger.exception(type(error).__name__, exc_info=error)
 
-bot = deddy(description=description, pm_help=True)
 if __name__ == '__main__':
     #loop = asyncio.get_event_loop()
     for extension in initial_extensions:
