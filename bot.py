@@ -10,6 +10,17 @@ import asyncio
 import pip
 
 
+def init_logging(bot):
+    logging.root.setLevel(logging.INFO)
+    logger = logging.getLogger('Logger')
+    logger.setLevel(logging.INFO)
+    log = logging.getLogger()
+    log.setLevel(logging.INFO)
+    handler = logging.FileHandler(filename='Logger.log', encoding='utf-8', mode ='a')
+    log.addHandler(handler)
+    bot.logger = logger
+    bot.log = log
+
 h = "info.json"
 if not os.path.exists(h):
     with open(h, "w") as f:
@@ -118,105 +129,97 @@ initial_extensions = [
     ]
 
 description = '''A Bot Made by Teddy And Dangerous through Discord.py.'''
-bot = commands.Bot(command_prefix=commands.when_mentioned_or(config["PREFIX"]), description=description, pm_help=True)
 
-@bot.event
-async def on_ready():
-    users = len(set(bot.get_all_members()))
-    servers = len(bot.servers)
-    channels = len([c for c in bot.get_all_channels()])
-    if config["GAME"] == "None":
-        config["GAME"] = '{}help | #Deddy'.format(config["PREFIX"])
-        d = '(DEFAULT)'
-    else:
-        config["GAME"] = config["GAME"]
-        d = '(CUSTOM)'
-
-    if config["TOKEN"] is not None and config["OWNER"] is None:
-        data = await bot.application_info()
-        with open(h, "r+") as f:
-            configg = json.load(f)
-            configg["OWNER"] = data.owner.id
-            f.seek(0)
-            f.write(json.dumps(configg, indent=4, sort_keys=True))
-            f.truncate()
-    print('+-------------Deddy-------------+')
-    print('Logged in as : \n{}({})'.format(bot.user.name,bot.user.id))
-    print('Current prefix : {}'.format(config["PREFIX"]))
-    print('Developer status set to : {}'.format(config["DEV_MODE"]))
-    await bot.change_presence(game=discord.Game(name=config["GAME"], status=None))
-    print('Playing status set to : {} {}'.format(config["GAME"], d))
-    print('+------Current Statistics------+')
-    #print('')
-    print("{} servers".format(servers))
-    print("{} channels".format(channels))
-    print("{} users".format(users))
-    print('_-----------------------------_')
-    for extension in initial_extensions:
-        try:
-            bot.load_extension(extension)
-        except Exception as e:
-            print('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
-
-def init_logging(bot):
-    logging.root.setLevel(logging.INFO)
-    logger = logging.getLogger('Logger')
-    logger.setLevel(logging.INFO)
-    log = logging.getLogger()
-    log.setLevel(logging.INFO)
-    handler = logging.FileHandler(filename='Logger.log', encoding='utf-8', mode ='async')
-    log.addHandler(handler)
-    bot.logger = logger
-    bot.log = log
-
-@bot.event
-async def on_message(message):
-    if message.author.bot:
-        return
-    if message.content.startswith(config["PREFIX"]):
-        await bot.process_commands(message)
-
-    await bot.process_commands(message)
-
-@bot.event
-async def on_message_edit(before, message):
-    if message.author.bot:
-        return
-    if message.content.startswith(config["PREFIX"]):
-        await bot.process_commands(message)
+class deddy(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        command_prefix= kwargs.pop('command_prefix', commands.when_mentioned_or(config["PREFIX"]))
+        init_logging(self)
+        super().__init__(command_prefix=command_prefix, *args, **kwargs)
 
 
-@bot.event
-async def on_command_error(error, ctx):
-    channel = ctx.message.channel
-    if isinstance(error, commands.MissingRequiredArgument):
-        await send_cmd_help(ctx)
-    elif isinstance(error, commands.BadArgument):
-        await send_cmd_help(ctx)
-    elif isinstance(error, commands.DisabledCommand):
-        await bot.send_message(channel, "✋ **That command is disabled.** ⛔")
-    elif isinstance(error, commands.CommandInvokeError):
-        logger.exception("Exception in command '{}'".format(
-            ctx.command.qualified_name), exc_info=error.original)
-        oneliner = "Error in command '{}' - {}: {}".format(
-            ctx.command.qualified_name, type(error.original).__name__,
-            str(error.original))
-        await ctx.bot.send_message(channel, inline(oneliner))
-    elif isinstance(error, commands.CommandNotFound):
-        pass
-    elif isinstance(error, commands.CheckFailure):
-        pass
-    elif isinstance(error, commands.NoPrivateMessage):
-        await bot.send_message(channel, "✋ That command is not "
-                                        "available in DMs.")
-    elif isinstance(error, commands.CommandOnCooldown):
-        await bot.send_message(channel, "✋ **A command cooldown is initiated on this command."
-                                        " Try again in** ***`{:.2f}`s***"
-                                        "".format(error.retry_after))
 
-    else:
-        logger.exception(type(error).__name__, exc_info=error)
+    async def on_ready(self):
+        users = len(set(self.get_all_members()))
+        servers = len(self.servers)
+        channels = len([c for c in self.get_all_channels()])
+        if config["GAME"] == "None":
+            config["GAME"] = '{}help | #Deddy'.format(config["PREFIX"])
+            d = '(DEFAULT)'
+        else:
+            config["GAME"] = config["GAME"]
+            d = '(CUSTOM)'
 
+        if config["TOKEN"] is not None and config["OWNER"] is None:
+            data = await self.application_info()
+            with open(h, "r+") as f:
+                configg = json.load(f)
+                configg["OWNER"] = data.owner.id
+                f.seek(0)
+                f.write(json.dumps(configg, indent=4, sort_keys=True))
+                f.truncate()
+        print('+-------------Deddy-------------+')
+        print('Logged in as : \n{}({})'.format(self.user.name,self.user.id))
+        print('Current prefix : {}'.format(config["PREFIX"]))
+        print('Developer status set to : {}'.format(config["DEV_MODE"]))
+        await self.change_presence(game=discord.Game(name=config["GAME"], status=None))
+        print('Playing status set to : {} {}'.format(config["GAME"], d))
+        print('+------Current Statistics------+')
+        #print('')
+        print("{} servers".format(servers))
+        print("{} channels".format(channels))
+        print("{} users".format(users))
+        print('_-----------------------------_')
+        for extension in initial_extensions:
+            try:
+                self.load_extension(extension)
+            except Exception as e:
+                print('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
+
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+        if message.content.startswith(config["PREFIX"]):
+            await self.process_commands(message)
+
+        await self.process_commands(message)
+
+    async def on_message_edit(before, message):
+        if message.author.bot:
+            return
+        if message.content.startswith(config["PREFIX"]):
+            await bot.process_commands(message)
+
+    async def on_command_error(self, error, ctx):
+        channel = ctx.message.channel
+        if isinstance(error, commands.MissingRequiredArgument):
+            await send_cmd_help(ctx)
+        elif isinstance(error, commands.BadArgument):
+            await send_cmd_help(ctx)
+        elif isinstance(error, commands.DisabledCommand):
+            await self.send_message(channel, "✋ **That command is disabled.** ⛔")
+        elif isinstance(error, commands.CommandInvokeError):
+            logger.exception("Exception in command '{}'".format(
+                ctx.command.qualified_name), exc_info=error.original)
+            oneliner = "Error in command '{}' - {}: {}".format(
+                ctx.command.qualified_name, type(error.original).__name__,
+                str(error.original))
+            await ctx.self.send_message(channel, inline(oneliner))
+        elif isinstance(error, commands.CommandNotFound):
+            pass
+        elif isinstance(error, commands.CheckFailure):
+            pass
+        elif isinstance(error, commands.NoPrivateMessage):
+            await self.send_message(channel, "✋ That command is not "
+                                            "available in DMs.")
+        elif isinstance(error, commands.CommandOnCooldown):
+            await self.send_message(channel, "✋ **A command cooldown is initiated on this command."
+                                            " Try again in** ***`{:.2f}`s***"
+                                            "".format(error.retry_after))
+
+        else:
+            pass
+
+bot = deddy(description=description, pm_help=True)
 if __name__ == '__main__':
     #loop = asyncio.get_event_loop()
     for extension in initial_extensions:
