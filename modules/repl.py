@@ -1,5 +1,4 @@
 from discord.ext import commands
-from utils import checks
 import asyncio
 import traceback
 import discord
@@ -28,8 +27,7 @@ class REPL:
             return '```py\n{0.__class__.__name__}: {0}\n```'.format(e)
         return '```py\n{0.text}{1:>{0.offset}}\n{2}: {0}```'.format(e, '^', type(e).__name__)
 
-    @bot.command(pass_context=True, hidden=True, name='eval')
-    @checks.is_owner()
+    @commands.command(pass_context=True, hidden=True, name='eval')
     async def _eval(self, ctx, *, body: str):
         env = {
             'bot': self.bot,
@@ -74,8 +72,7 @@ class REPL:
                 self._last_result = ret
                 await self.bot.say('```py\n%s%s\n```' % (value, ret))
 
-    @bot.command(pass_context=True, hidden=True)
-    @checks.is_owner()
+    @commands.command(pass_context=True, hidden=True)
     async def repl(self, ctx):
         msg = ctx.message
 
